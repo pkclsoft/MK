@@ -1,0 +1,130 @@
+MK Command Description
+----------------------
+
+'MK' takes a file of dependencies (a 'makefile') and decides what commands
+have to be executed to bring the files up to date. 
+
+Syntax:
+    make [-version] [-all] [-execute] [-noexecute] [-commandfile filename]
+         [-ignore] [-noignore] [-target targetname] [-list] [filename]
+
+    -version        Display version information.
+
+    -all            Force MK to 'build' all targets.  All targets are built
+                    regardless of whether the time/date information requires
+                    it.
+
+    -execute        Execute build commands.  Any commands that MK decides must
+                    be executed, will be executed.  This switch is on by
+                    default.  It is advised that you specify this switch in
+                    any case when ever you require this function, as in the
+                    future the default setting may change. 
+
+    -noexecute      Negates the -execute switch.  Prevents any build commands
+                    from being executed.
+
+    -commandfile    All commands are written to the specified file, and not
+                    executed.  Note that this switch negates the -execute
+                    switch.
+
+    -ignore         Normally, MK will abort a build whenever an error occurs,
+                    however by using this switch you may ask MK to ignore any
+                    errors that occur as a result of a NON-COMPILE command. 
+                    Currently, MK recognises a command containing any of the
+                    following strings as a compile command:
+
+                    COMPILE     CMPL        CMPLG       ASSEMBLE    ASML
+                    ASMLG       ASM
+
+                    By default, this switch is set to on, and may only be
+                    turned off by the -noignore switch.  It is advised that
+                    you specify this switch in any case when ever you require
+                    this function, as in the future the default setting may
+                    change. 
+
+    -noignore       Turns off the function invoked by the -ignore switch.
+
+    -target         Asks MK to 'MAKE' the specified target.  Note that the
+                    target name is case sensitive.  This switch may be used
+                    repetitively on the command line. 
+
+    -list           This switch must be used in conjunction with the -target
+                    switch.  It asks MK to produce a dependency list for each
+                    of the targets specified using the -target switch. 
+
+    filename        This parameter names the file from which MK reads the
+                    target list and the dependencies.  If no value is given to
+                    this parameter, then MK will look for the file MAKEFILE in
+                    the current directory.
+
+  ------------------------------======***======------------------------------
+
+MK MakeFile Description
+-----------------------
+
+The 'MakeFile' contains a list of dependencies.  Each dependency has xxxx
+parts, as follows:
+
+    Target      The target is the name of a file that is to be the result of
+                one or more commands.  A target has one or more depencencies
+                or sources. 
+
+    Source      The source is a file that is associated with a target in that
+                whenever MK finds a Source with a time/date stamp that is
+                later than the Target, MK will flag that target as one to be
+                built. 
+
+    Commands    When MK decides to build a target, it executes one or more
+                commands that are specified as a part of the dependency. 
+                Commands can cross line boundaries.  This is done by
+                placing a hyphen (-) character at the end of a line.  By
+                doing this MK will concatenate the contents of the next
+                line to the command that was broken. 
+
+The syntax of a Dependency is as follows:
+
+Target Source1 [Source1...SourceN] [= Single Command]|[{ Several Commands }]
+
+For example, the following three dependencies form the MAKEFILE for MK itself.
+
+mk                                  ! Make the executable.
+    mk.obj
+    { linkiigs -t exe -o mk mk.obj -
+               -lib 2/ezlib -lib 2/paslib -lib 2/syslib
+      catalog}
+
+mk.obj mk.a = crunchiigs mk         ! Make the .OBJ file for LinkIIGS.
+
+mk.a mk.pas { compile mk.pas }      ! Produce the .ROOT and .A files.
+
+The dependencies may be in any order, as MK reads them all in before doing any
+time/date checking.
+
+Before processing any line of text in the MAKEFILE, MK will trim any
+leading or trailing spaces from the line, and convert any TAB characters to
+spaces. 
+
+Comments may be placed in the MAKEFILE at any time, simply be preceding the
+command with an Exclamation mark (!).
+
+
+IMPORTANT:
+
+    Target and Source names are CASE SENSITIVE! If you mix case in one
+    declaration of a target or source, then you must use the same mixture
+    of case in all other occurences of the target/source name. 
+
+    If you make an error in this regard then the results will be
+    unpredictable, excepting that the program will not crash. 
+
+  ------------------------------======***======------------------------------
+
+If any problems are experienced or you have some suggestions, please feel free
+to contact EZ-Soft on any of the following:
+
+Applelink:  AUST0367
+Phone:      (612) 365 1271
+Mail:       G.P.O Box 880
+            Sydney N.S.W. 2001
+            Australia
+

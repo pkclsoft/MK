@@ -1,0 +1,49 @@
+! A make file to make make.
+obj/mk
+    obj/mk.a {
+            link obj/mk obj/ezconst obj/ezmisc obj/ezdates obj/ezstring obj/ezasm keep=obj/mk
+           }
+obj/ezasm.a
+  asm/ezasm.asm
+  	{ assemble asm/ezasm.asm
+  	  move -C ezasm.a obj
+  	  move -C ezasm.root obj
+  	}
+obj/ezconst.a
+  pas/ezconst.unit
+	{ assemble pas/ezconst.unit
+	  move -C ezconst.int int
+	  move -C ezconst.a obj
+	}
+obj/ezstring.a
+  pas/ezstring.unit
+	{ assemble pas/ezstring.unit
+	  move -C ezstring.int int
+	  move -C ezstring.a obj
+	}
+obj/ezmisc.a
+  pas/ezmisc.unit
+  obj/ezconst.a
+	{ assemble pas/ezmisc.unit
+	  move -C ezmisc.int int
+	  move -C ezmisc.a obj
+	}
+obj/ezdates.a
+  pas/ezdates.unit
+  obj/ezmisc.a
+  obj/ezconst.a
+	{ assemble pas/ezdates.unit
+	  move -C ezdates.int int
+	  move -C ezdates.a obj
+	}
+obj/mk.a
+  obj/ezconst.a
+  obj/ezmisc.a
+  obj/ezstring.a
+  obj/ezdates.a
+  obj/ezasm.a
+  pas/mk.pas
+	{ assemble pas/mk.pas
+	  move -C mk.a obj
+	  move -C mk.root obj
+	}

@@ -1,0 +1,31 @@
+if {#} == 1
+  if {1} == +D
+    set debugIt "+D"
+    echo "Building with debug enabled"
+  else
+    set debugIt ""
+  end
+else
+  set debugIt ""
+end
+
+filetype asm/=.asm src 3
+filetype asm/=.macros src 3
+filetype pas/= src 5
+filetype makefile src
+assemble {debugIt} asm/ezasm.asm keep=$
+assemble {debugIt} pas/ezconst.unit keep=$
+move -C =.int int
+assemble {debugIt} pas/ezmisc.unit keep=$
+move -C =.int int
+assemble {debugIt} pas/ezdates.unit keep=$
+move -C =.int int
+assemble {debugIt} pas/ezstring.unit keep=$
+move -C =.int int
+assemble {debugIt} pas/mk.pas keep=$
+move -C =.a obj
+move -C =.root obj
+cd obj
+link mk ezasm ezconst ezmisc ezdates ezstring keep=mk
+move -C mk ..
+cd ..
