@@ -1,4 +1,4 @@
-! A make file to make make.
+! A make file to make MK.
 obj/mk
     obj/mk.a {
             link obj/mk obj/ezconst obj/ezmisc obj/ezdates obj/ezstring obj/ezasm keep=obj/mk

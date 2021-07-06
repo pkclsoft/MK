@@ -887,6 +887,7 @@ begin   { initializeVars }
     targetTree := nil;
     sourceTree := nil;
     requestedTargets := nil;
+    debugEverything := false;
 
     CommandLine(theCommandLine);
     deleteWord(theCommandLine, 1);
