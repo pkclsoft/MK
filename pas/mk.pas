@@ -985,6 +985,12 @@ begin   { initializeVars }
     switch := '-d';
     if switchPresent then begin
         debugTimes := TRUE;
+        
+        switch := '-dd';
+        if switchPresent then begin
+            debugEverything := TRUE;
+        end;
+        
         deleteSwitch;
     end else begin
         debugTimes := FALSE;
@@ -1129,11 +1135,14 @@ begin   { buildTarget }
         if debugEverything then
             writeln(errorOutput, '<mk - last target built, end of chain');
     end else begin
+        callStatus := 0;
+        
         with current^ do begin
             if not built then begin
                 { not built yet - must go check dates of the sources }
                 if debugEverything then
                     writeln(errorOutput, '<mk - building sources of target: ', current^.name);
+                    
                 buildSource(sources, failed, sourceTime);
                 
                 if not failed then begin
@@ -1166,7 +1175,7 @@ begin   { buildTarget }
                 end;    { test for source list failed }
 
                 if failed then begin
-                    writeln(errorOutput, '<mk> Errors making ', name, ' :: abondoned');
+                    writeln(errorOutput, '<mk> Errors making ', name, ', call status: ', callStatus, ' :: abondoned');
                     halt(-1);
                 end else begin
                     { now built }
@@ -1210,6 +1219,9 @@ begin   { buildSource }
         if debugEverything then
             writeln(errorOutput, '<mk - last source built, end of chain');
     end else begin
+        sourceFailure := false;
+        sourceListFailure := false;
+        
         with current^.node^ do begin
             { we have a source entry }
             if not built then begin
@@ -1220,6 +1232,12 @@ begin   { buildSource }
                         writeln(errorOutput, '<mk - source <', current^.node^.name, '> is a target, building');
                     
                     buildTarget(targetId, sourceFailure, builtTime);
+                    
+                    if commandMake or (not doCommands) then begin
+                        { if we aren't actually doing the commands right now, then it's not a failure if the
+                          target has not been built }
+                        sourceFailure := false;
+                    end;
                 end else begin
                     { not target - just get time stamp for source }
                     if debugEverything then
