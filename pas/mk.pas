@@ -84,6 +84,7 @@ var
     theCommandFile              : text;         { a  command file }
     commandFileName             : fileName;     { name of the  command file }
     commandFileOpen             : boolean;      { if we have opened the command file }
+    commandFileReference        : integer;      { the reference number to the open command file }
     pipeFileName                : fileName;
     pipeFileOpen                : boolean;
 
@@ -170,11 +171,26 @@ begin
     CheckUserAbort;
 end;
 
+Procedure closeCommandFile;
+var
+    closeRec : closeOSDCB;
+begin
+    if commandFileOpen then begin
+        with closeRec do begin
+            pcount := 1;
+            refNum := commandFileReference;
+        end;
+        
+        CloseGS(closeRec);
+    end;
+end; { closeCommandFile }
+
 function doCommand(var inString : pString) : integer;
 { Executes the command line given.
   Requests the status of the subprocess having done the command.
   Loops getting output from the subprocess, writing the output to output until
   it gets the status response, and then passes back the status to the caller. }
+
 var
     Stat        : ReadVariableDCB;
     UnStat      : UnSetVariableDCB;
@@ -183,6 +199,13 @@ var
     errorNumber : integer;
     Comm        : ExecuteDCB;
 
+    commandFileNameStr : gsosInString;
+    createRec   : createOSDCB;
+    
+    openRec     : openOSDCB;
+    
+    newLine     : pString;
+    writeRec    : readWriteOSDCB;
 begin   { doCommand }
     if debugTimes THEN BEGIN
         writeln('DO <', inString, '>');
@@ -221,13 +244,64 @@ begin   { doCommand }
         { see if we are supposed to be putting this out into theCommandFile }
         if commandMake then begin
             if not commandFileOpen then begin
-                { file not open yet }
-                { and open the command file }
-                rewrite(theCommandFile, commandFileName);
-                commandFileOpen := true;
+                { file not open yet.  so first off, make sure it's there, 
+                  and has the right file and aux types }
+                commandFileNameStr.size := length(commandFileName);
+                commandFileNameStr.theString := copy(commandFileName, 1, commandFileNameStr.size);
+                with createRec do begin
+                    pcount := 5;
+                    pathName := @commandFileNameStr;
+                    access := readEnableMask + writeEnableMask + destroyEnableMask + renameEnableMask;
+                    fileType := SourceFile;
+                    auxType := $0006; { EXEC }
+                    storageType := StandardFileStorage;
+                end;
+                
+                CreateGS(createRec);
+                
+                if (ToolError = 0) or (ToolError = $47) then begin
+                    writeln(errorOutput, 'command file created');
+                    
+                    with openRec do begin
+                        pcount := 3;
+                        refNum := 0;
+                        pathName := @commandFileNameStr;
+                        requestAccess := writeEnableMask;
+                    end;
+                    
+                    { and open the command file }
+                    OpenGS(openRec);
+
+                    if ToolError = 0 then begin
+                        writeln(errorOutput, 'command file opened');
+                        commandFileOpen := true;
+                        commandFileReference := openRec.refNum;
+                    end;
+                end;
             end;    { check on whether command file is open yet or not }
 
-            writeln ( theCommandFile, inString );
+            if commandFileOpen then begin
+                with writeRec do begin
+                    pcount := 4;
+                    refNum := commandFileReference;
+                    dataBuffer := @inString[1];
+                    requestCount := length(inString);
+                end;
+                
+                WriteGS(writeRec);
+                
+                newLine[1] := chr(Return);
+                newLine[2] := chr(0);
+                
+                with writeRec do begin
+                    pcount := 4;
+                    refNum := commandFileReference;
+                    dataBuffer := @newLine[1];
+                    requestCount := 1;
+                end;
+                
+                WriteGS(writeRec);
+            end;
         end;    { test for whether we are making command file }
         
         doCommand := 0;
@@ -1391,4 +1465,9 @@ begin   { make program body }
         else { build everything }
             buildTargets(targetTree);
     end;    { test for LIST option }
+    
+    { if we have a command file, close it }
+    if commandMake then begin
+        closeCommandFile;
+    end;
 end.    { make }
