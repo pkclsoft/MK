@@ -144,6 +144,7 @@ Procedure outputAll;
 var
   theTarget : targetPtr;
 begin
+    writeln(errorOutput, 'Outputting all targets');
   theTarget := targetTree;
   
   while (theTarget <> nil) do
@@ -152,6 +153,7 @@ begin
     
     theTarget := theTarget^.right;
   end;
+  writeln(errorOutput, 'Outputting all targets complete.');
 end;
 
 Procedure CheckUserAbort;
@@ -419,8 +421,8 @@ var
     begin
         With getInfoParms do
         begin
-            theName.theString := makefileName;
             theName.size := length(makefileName);
+            theName.theString := copy(makefileName, 1, theName.size);
     
             pCount := 7;
             pathName := @theName;
@@ -691,6 +693,11 @@ var
 
                               readingTarget := false;
                               currentTarget := createTarget(targetTree, targetName);
+                            end else begin
+                              { no characters on the line that make up a target name, so 
+                                skip to the next line }
+                              readln(makefile);
+                              stripBlanks;
                             end;    { test for non-null target name }
                         end;    { test for comment line }
                     end;    { test for if eoln }
@@ -1056,18 +1063,23 @@ begin   { initializeVars }
         listDepend := false;
     end;
 
-    switch := '-d';
+    switch := '-dd';
     if switchPresent then begin
         debugTimes := TRUE;
-        
-        switch := '-dd';
-        if switchPresent then begin
-            debugEverything := TRUE;
-        end;
+        debugEverything := TRUE;
         
         deleteSwitch;
     end else begin
         debugTimes := FALSE;
+        debugEverything := FALSE;
+    END;
+
+    switch := '-d';
+    if switchPresent then begin
+        debugEverything := TRUE;
+        debugTimes := TRUE;
+        
+        deleteSwitch;
     END;
 
     switch := '-o';
@@ -1093,6 +1105,10 @@ begin   { initializeVars }
     
     if makeFileIsOK then begin
         readMakefile;
+    end;
+    
+    if debugEverything then begin
+        writeln(errorOutput, 'Make file has been read entirely');
     end;
 end;    { initializeVars }
 
@@ -1453,17 +1469,18 @@ end;    { buildTargets }
 begin   { make program body }
     initializeVars;
     
-    if debugEverything then
+    if debugEverything then begin
         outputAll;
+    end;
 
-    if listDepend then
+    if listDepend then
         listDependencies
     else begin
         { normal case - not list dependencies }
         if requestedTargets <> nil then
             buildSpecificTargets
         else { build everything }
-            buildTargets(targetTree);
+            buildTargets(targetTree);
     end;    { test for LIST option }
     
     { if we have a command file, close it }
