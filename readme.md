@@ -54,10 +54,9 @@ One you've build MK, to use it within the ORCA shell easily, you need to do the 
  1. Copy "mk" to 17/ which is the prefix ORCA uses normally for all of the utility applications.
  2. Copy "mk.doc" to 17/help/mk.  This places the help file in the place ORCA expects to find it when you type in "help mk".
  3. Edit the 15/syscmd file and add the line:
-
+.
 
     MK         U                Make tool
-
 
 ## Executing
 Assuming you've installed it as per the instructions, once you restart the shell, all you should need to do is enter "mk" and it will do the rest.  If you choose not to install it, you can just run the command manually.
