@@ -1,9 +1,9 @@
-*/**/*.def filter=crtext
-*/**/*.mod filter=crtext
+*/**/*.pas filter=crtext
+*/**/*.unit filter=crtext
 */**/build* filter=crtext
-*/**/fixtypes filter=crtext
-mod filter=crtext
-def filter=crtext
+pas filter=crtext
 */**/*.rez filter=crtext
 */**/*.asm filter=crtext
 */**/*.macros filter=crtext
+*/**/readme* filter=crtext
+*/**/MAKEFILE* filter=crtext
