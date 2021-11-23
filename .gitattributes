@@ -1,6 +1,7 @@
 */**/*.pas filter=crtext
 */**/*.unit filter=crtext
 */**/build* filter=crtext
+build
 pas filter=crtext
 */**/*.rez filter=crtext
 */**/*.asm filter=crtext
