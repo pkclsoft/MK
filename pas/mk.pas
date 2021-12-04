@@ -827,6 +827,8 @@ var
             inSourceList := true;
 
             while inSourceList do begin
+                stripBlanks;
+
                 if eof(makefile) then begin
                     { didn't finish a source list before we fell down }
                     inSourceList := false;
@@ -1473,14 +1475,14 @@ begin   { make program body }
         outputAll;
     end;
 
-    if listDepend then
+    if listDepend then
         listDependencies
     else begin
         { normal case - not list dependencies }
         if requestedTargets <> nil then
             buildSpecificTargets
         else { build everything }
-            buildTargets(targetTree);
+            buildTargets(targetTree);
     end;    { test for LIST option }
     
     { if we have a command file, close it }
